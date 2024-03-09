@@ -1,0 +1,192 @@
+import 'package:flutter/material.dart';
+import 'package:money_tracker/login/model/user_model.dart';
+import 'package:money_tracker/login/provider/auth_provider.dart';
+import 'package:money_tracker/login/ui/login_screen.dart';
+import 'package:money_tracker/shard/app_colors.dart';
+import 'package:money_tracker/shard/app_string.dart';
+import 'package:money_tracker/shard/app_text_field.dart';
+
+import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+  TextEditingController nameController = TextEditingController();
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Consumer<AuthProvider>(
+        builder: (context, authProvider, widget) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Spacer(),
+                      Text(
+                        register,
+                        style: GoogleFonts.poppins(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        createAccount,
+                        style: GoogleFonts.poppins(fontSize: 14),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        userName,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: nameController,
+                        hintText: nameFieldHint,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        email,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: emailController,
+                        hintText: emailFieldHint,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        password,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: passwordController,
+                        obscureText: true,
+                        hintText: passwordFieldHint,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        confirmPassword,
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      AppTextField(
+                        controller: confirmPasswordController,
+                        obscureText: authProvider.isVisible ? false : true,
+                        hintText: reconfirmPassword,
+                        suffixIcon: IconButton(
+                          icon: const Icon(Icons.remove_red_eye),
+                          onPressed: () {
+                            authProvider.setPasswordFieldStatus();
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      InkWell(
+                        onTap: () {
+                          registerUser();
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            color: textButtonColor,
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: const Text(
+                            register,
+                            style: TextStyle(color: buttonTextColor),
+                          ),
+                        ),
+                      ),
+                      const Spacer(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            alreadyAccount,
+                            style: GoogleFonts.poppins(),
+                          ),
+                          const SizedBox(width: 4),
+                          TextButton(
+                            onPressed: () {
+                              loginUserScreen();
+                            },
+                            child: Text(
+                              login,
+                              style: GoogleFonts.poppins(
+                                color: textButtonColor,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                  Positioned(
+                    child: authProvider.isLoading
+                        ? const CircularProgressIndicator()
+                        : const SizedBox(),
+                  )
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Future registerUser() async {
+    User user = User(
+      email: emailController.text,
+      password: passwordController.text,
+      name: nameController.text,
+
+    );
+    AuthProvider provider = Provider.of<AuthProvider>(context, listen: false);
+    await provider.registerUser(user);
+    if (mounted && provider.error == null) {
+      Navigator.pop(context);
+    }
+  }
+
+  void loginUserScreen() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) {
+      return const LoginScreen();
+    }));
+  }
+}
